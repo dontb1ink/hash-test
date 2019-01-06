@@ -9,8 +9,12 @@ using namespace std;
 
 BOOST_AUTO_TEST_CASE(test1) {
     HashTable<char> ht;
-    ht.put('a');
-    ht.put('b');
+    char x;
+
+    x = 'a';
+    ht.put(x);
+    x = 'b';
+    ht.put(x);
     BOOST_TEST(ht.get() == 2);
 }
 
