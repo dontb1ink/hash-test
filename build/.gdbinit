@@ -7,12 +7,12 @@ define pt
         while($i < $arg1)
             printf "%d: ", $i
             set $j=ht.table[$i]
-                if(!$j.isOpen)
+                if(!$j.open)
                     while($j.next != 0)
-                        printf "%c ", $j.val
+                        printf "(%c,%c) ", $j.key, $j.val
                         set $j=$j.next
                     end
-                    printf "%c", $j.val
+                    printf "(%c,%c) ", $j.key, $j.val
                 end
                 printf "\n"
             set $i=$i+1

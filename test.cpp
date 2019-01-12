@@ -8,14 +8,14 @@
 using namespace std;
 
 BOOST_AUTO_TEST_CASE(test1) {
-    HashTable<char> ht;
+    HashTable<char, char> ht;
     char x;
 
     x = 'a';
-    ht.put(x);
+    ht.put(x,x);
     x = 'b';
-    ht.put(x);
-    BOOST_TEST(ht.get() == 2);
+    ht.put(x,x);
+    BOOST_TEST(ht.get('a') == 'a');
 }
 
 /* BOOST_AUTO_TEST_CASE(test1) {
