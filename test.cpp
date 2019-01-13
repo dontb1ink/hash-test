@@ -15,7 +15,9 @@ BOOST_AUTO_TEST_CASE(test1) {
     ht.put(x,x);
     x = 'b';
     ht.put(x,x);
-    BOOST_TEST(ht.get('a') == 'a');
+    x = 'b';
+    ht.put(x,'u');
+    BOOST_TEST(ht.get('b') == 'u');
 }
 
 /* BOOST_AUTO_TEST_CASE(test1) {

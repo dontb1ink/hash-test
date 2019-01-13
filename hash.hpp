@@ -28,7 +28,13 @@ public:
         Element* i(&table[index]);
 
         if (!i->open) {
-            // Implement find element with key or new element at end
+            for (; i->key != key; i = i->next) {
+                if (!i->next) {
+                    i->next = new Element();
+                    i = i->next;
+                    break;
+                }
+            }
         }
         i->set(key, val);
     }
@@ -39,6 +45,7 @@ public:
         while (i->key != key && i->next) i = i->next;
         return i->val;
     }
+    // remove reqiures a copy in some cases.  need to switch to pointer based table.
 };
 
 #endif
