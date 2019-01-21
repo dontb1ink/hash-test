@@ -24,12 +24,43 @@ private:
     std::size_t size;
     std::size_t capacity;
     Element** table;
-    void resize(){
+    void resize() {
+        std::size_t index;
+        Element *i, *tmp;
+        std::size_t old_capacity(capacity);
+        Element** old_table(table);
 
+        bucket_count = 0;
+        size = 0;
+        capacity = old_capacity * 2;
+        table = new Element*[capacity]();
+        for (index = 0; index < old_capacity; index++) {
+            i = old_table[index];
+            while (i) {
+                put(i->key, i->val);
+                tmp = i;
+                i = i->next;
+                delete tmp;
+            }
+        }
+        delete[] old_table;
     }
 
 public:
     HashTable() : bucket_count(0), size(0), capacity(16), table(new Element*[capacity]()){};
+    ~HashTable() {
+        std::size_t index;
+        Element *i, *tmp;
+        for (index = 0; index < capacity; index++) {
+            i = table[index];
+            while (i) {
+                tmp = i;
+                i = i->next;
+                delete tmp;
+            }
+        }
+        delete[] table;
+    }
     void put(const K& key, const V& val) {
         std::size_t index(hash(key) % capacity);
         Element* i(table[index]);
@@ -42,11 +73,13 @@ public:
             i = new Element();
             table[index] = i;
             bucket_count++;
+            size++;
         } else {
             for (; i->key != key; i = i->next) {
                 if (!i->next) {
                     i->next = new Element();
                     i = i->next;
+                    size++;
                     break;
                 }
             }
@@ -55,7 +88,7 @@ public:
     }
 
     const V& get(const K& key) {
-        int index(hash(&key) % capacity);
+        int index(hash(key) % capacity);
         Element* i(table[index]);
 
         while (i && i->key != key) i = i->next;
@@ -64,15 +97,15 @@ public:
     }
 
     void remove(const K& key) {
-        int index(hash(&key) % capacity);
+        int index(hash(key) % capacity);
         Element* i(table[index]);
-        Element* tmp;
+        Element* tmp(nullptr);
 
         if (!i) {
             return;
         } else if (i->key == key) {
             table[index] = i->next;
-            if(!table[index]) bucket_count--;
+            if (!table[index]) bucket_count--;
             tmp = i;
         } else {
             for (; i->next; i = i->next) {
@@ -83,7 +116,10 @@ public:
                 }
             }
         }
-        delete tmp;
+        if(tmp){
+            delete tmp;
+            size--;
+        }
     }
 };
 

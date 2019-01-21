@@ -11,10 +11,10 @@ define pt
             set $j=$arg0.table[$i]
                 if($j)
                     while($j.next)
-                        printf "(%c,%c) ", $j.key, $j.val
+                        printf "(%d,%d) ", $j.key, $j.val
                         set $j=$j.next
                     end
-                    printf "(%c,%c) ", $j.key, $j.val
+                    printf "(%d,%d) ", $j.key, $j.val
                 end
                 printf "\n"
             set $i=$i+1
