@@ -1,4 +1,6 @@
 // clang-format off
+#include <iostream>
+#include <string>
 #include "hash.hpp"
 
 #define BOOST_TEST_MODULE hash
@@ -9,17 +11,9 @@ using namespace std;
 
 BOOST_AUTO_TEST_CASE(test1) {
     HashTable<char, char> ht;
-    char x;
-
-    x = 'a';
-    ht.put(x,x);
-    x = 'b';
-    ht.put(x,x);
-    x = 'b';
-    ht.put(x,'u');
-    BOOST_TEST(ht.get(x) == 'u');
-    x = 'a';
-    ht.remove(x);
+    ht.put('a', 'a');
+    ht.put('b', 'b');
+    ht.put('d', 'u');
 }
 
 /* BOOST_AUTO_TEST_CASE(test1) {
