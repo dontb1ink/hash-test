@@ -1,47 +1,49 @@
 // clang-format off
 #include <iostream>
-#include <cstdlib>
-#include <stack>
 #include "hash.hpp"
 
 #define BOOST_TEST_MODULE hash
 #include <boost/test/included/unit_test.hpp>
 // clang-format on
 
-using namespace std;
+#define INITIAL_CAPACITY 16
+#define LOAD_FACTOR 0.75
 
-BOOST_AUTO_TEST_CASE(test1) {
-    srand(42);
-    
-    std::stack<int> stack;
-    HashTable<int, int> ht;
-    int adds(0), removes(0);
-    for(int i=0; i<1000; i++){
-        int random = rand();
-        if(random % 9 == 0 && !stack.empty()){
-            ht.remove(stack.top());
-            stack.pop();
-            removes++;
-        } else {
-            ht.put(random, 0);
-            stack.push(random);
-            adds++;
-        }
+BOOST_AUTO_TEST_CASE(test_resize1) {
+    int i, threshold(INITIAL_CAPACITY * LOAD_FACTOR);
+    HashTable<int, char> ht;
+
+    for (i = 0; i < threshold; i++) {
+        ht.put(i, i);
     }
-    BOOST_TEST(ht.get(stack.top()) == 0);
+    for (i = 0; i < threshold; i++) {
+        BOOST_TEST(ht.get(i) == i);
+    }
+    BOOST_TEST(ht.size() == threshold);
 }
 
-/* BOOST_AUTO_TEST_CASE(test1) {
+BOOST_AUTO_TEST_CASE(test_resize2) {
+    int i, threshold(INITIAL_CAPACITY * LOAD_FACTOR), offset(42);
+    HashTable<int, char> ht;
 
-    RBTree<int> rbt;
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(1);
-    rbt.insert(2);
-    BOOST_TEST(rbt.find(6) == false);
-} */
+    for (i = 0; i < threshold; i++) {
+        ht.put(i + offset, i);
+    }
+    for (i = 0; i < threshold; i++) {
+        BOOST_TEST(ht.get(i + offset) == i);
+    }
+    BOOST_TEST(ht.size() == threshold);
+}
+
+BOOST_AUTO_TEST_CASE(test_resize3) {
+    int i, threshold(INITIAL_CAPACITY * LOAD_FACTOR * 2 * 2 * 2);
+    HashTable<int, char> ht;
+
+    for (i = 0; i < threshold; i++) {
+        ht.put(i, i);
+    }
+    for (i = 0; i < threshold; i++) {
+        BOOST_TEST(ht.get(i) == i);
+    }
+    BOOST_TEST(ht.size() == threshold);
+}

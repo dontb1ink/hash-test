@@ -20,107 +20,105 @@ private:
     };
     static constexpr float loadFactor = 0.75;
     static constexpr std::hash<K> hash{};
-    std::size_t bucket_count;
-    std::size_t size;
-    std::size_t capacity;
-    Element** table;
-    void resize() {
-        std::size_t index;
-        Element *i, *tmp;
-        std::size_t old_capacity(capacity);
-        Element** old_table(table);
+    std::size_t m_bucket_count;
+    std::size_t m_size;
+    std::size_t m_capacity;
+    Element** m_table;
 
-        bucket_count = 0;
-        size = 0;
-        capacity = old_capacity * 2;
-        table = new Element*[capacity]();
+    void ht_resize() {
+        std::size_t index, old_capacity(m_capacity);
+        Element *e, *tmp;
+        Element** old_table(m_table);
+
+        m_bucket_count = 0;
+        m_size = 0;
+        m_capacity = old_capacity * 2;
+        m_table = new Element*[m_capacity]();
         for (index = 0; index < old_capacity; index++) {
-            i = old_table[index];
-            while (i) {
-                put(i->key, i->val);
-                tmp = i;
-                i = i->next;
-                delete tmp;
-            }
+            e = old_table[index];
+            for (e = old_table[index]; e; tmp = e, put(e->key, e->val), e = e->next, delete tmp)
+                ;
         }
         delete[] old_table;
     }
 
-public:
-    HashTable() : bucket_count(0), size(0), capacity(16), table(new Element*[capacity]()){};
-    ~HashTable() {
-        std::size_t index;
-        Element *i, *tmp;
-        for (index = 0; index < capacity; index++) {
-            i = table[index];
-            while (i) {
-                tmp = i;
-                i = i->next;
-                delete tmp;
-            }
-        }
-        delete[] table;
-    }
-    void put(const K& key, const V& val) {
-        std::size_t index(hash(key) % capacity);
-        Element* i(table[index]);
+    void ht_put(const K& key, const V& val) {
+        std::size_t index(hash(key) % m_capacity);
+        Element* e(m_table[index]);
 
-        if (!i) {
-            if (bucket_count + 1 >= loadFactor * capacity) {
-                resize();
-                return put(key, val);
-            }
-            i = new Element();
-            table[index] = i;
-            bucket_count++;
-            size++;
-        } else {
-            for (; i->key != key; i = i->next) {
-                if (!i->next) {
-                    i->next = new Element();
-                    i = i->next;
-                    size++;
+        if (e) {
+            for (; e->key != key; e = e->next) {
+                if (!e->next) {
+                    e->next = new Element();
+                    e = e->next;
                     break;
                 }
             }
+        } else if (m_bucket_count + 1 >= loadFactor * m_capacity) {
+            ht_resize();
+            return put(key, val);
+        } else {
+            e = new Element();
+            m_table[index] = e;
+            m_bucket_count++;
         }
-        i->set(key, val);
+        e->set(key, val);
+        m_size++;
     }
 
-    const V& get(const K& key) {
-        int index(hash(key) % capacity);
-        Element* i(table[index]);
+    const V& ht_get(const K& key) {
+        int index(hash(key) % m_capacity);
+        Element* e(m_table[index]);
 
-        while (i && i->key != key) i = i->next;
-        if (!i) throw key;
-        return i->val;
+        for (; e && e->key != key; e = e->next)
+            ;
+        if (!e) throw key;
+        return e->val;
     }
 
-    void remove(const K& key) {
-        int index(hash(key) % capacity);
-        Element* i(table[index]);
+    void ht_remove(const K& key) {
+        int index(hash(key) % m_capacity);
+        Element* e(m_table[index]);
         Element* tmp(nullptr);
 
-        if (!i) {
-            return;
-        } else if (i->key == key) {
-            table[index] = i->next;
-            if (!table[index]) bucket_count--;
-            tmp = i;
+        if (e) return;
+        if (e->key == key) {
+            tmp = e;
+            m_table[index] = e->next;
+            if (!e->next) m_bucket_count--;
         } else {
-            for (; i->next; i = i->next) {
-                if (i->next->key == key) {
-                    tmp = i->next;
-                    i->next = i->next->next;
+            for (; e->next; e = e->next) {
+                if (e->next->key == key) {
+                    tmp = e->next;
+                    e->next = e->next->next;
                     break;
                 }
             }
         }
-        if(tmp){
+        if (tmp) {
             delete tmp;
-            size--;
+            m_size--;
         }
     }
+
+    void ht_free() {
+        std::size_t index;
+        Element *e, *tmp;
+
+        for (index = 0; index < m_capacity; index++) {
+            for (e = m_table[index]; e; tmp = e, e = e->next, delete tmp)
+                ;
+        }
+        delete[] m_table;
+    }
+
+public:
+    HashTable() : m_bucket_count(0), m_size(0), m_capacity(16), m_table(new Element*[m_capacity]()){};
+    ~HashTable() { ht_free(); }
+    void put(const K& key, const V& val) { return ht_put(key, val); }
+    const V& get(const K& key) { return ht_get(key); }
+    void remove(const K& key) { return ht_remove(key); }
+    std::size_t size(){ return m_size; }
 };
 
 #endif
