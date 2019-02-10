@@ -18,7 +18,6 @@ private:
             this->val = val;
         }
     };
-    static constexpr float loadFactor = 0.75;
     static constexpr std::hash<K> hash{};
     std::size_t m_bucket_count;
     std::size_t m_size;
@@ -54,7 +53,7 @@ private:
                     break;
                 }
             }
-        } else if (m_bucket_count + 1 >= loadFactor * m_capacity) {
+        } else if (m_bucket_count + 1 >= LOAD_FACTOR * m_capacity) {
             ht_resize();
             return put(key, val);
         } else {
@@ -81,7 +80,7 @@ private:
         Element* e(m_table[index]);
         Element* tmp(nullptr);
 
-        if (e) return;
+        if (!e) return;
         if (e->key == key) {
             tmp = e;
             m_table[index] = e->next;
@@ -113,7 +112,9 @@ private:
     }
 
 public:
-    HashTable() : m_bucket_count(0), m_size(0), m_capacity(16), m_table(new Element*[m_capacity]()){};
+    static constexpr float LOAD_FACTOR = 0.75;
+    static constexpr std::size_t INITIAL_CAPACITY = 16;
+    HashTable() : m_bucket_count(0), m_size(0), m_capacity(INITIAL_CAPACITY), m_table(new Element*[m_capacity]()){};
     ~HashTable() { ht_free(); }
     void put(const K& key, const V& val) { return ht_put(key, val); }
     const V& get(const K& key) { return ht_get(key); }
