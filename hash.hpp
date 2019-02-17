@@ -12,7 +12,7 @@ private:
         V val;
         Element* next;
 
-        Element() : next(nullptr){};
+        Element() : next{} {};
         void set(const K& key, const V& val) {
             this->key = key;
             this->val = val;
@@ -25,25 +25,23 @@ private:
     Element** m_table;
 
     void ht_resize() {
-        std::size_t index, old_capacity(m_capacity);
-        Element *e, *tmp;
-        Element** old_table(m_table);
+        std::size_t old_capacity{m_capacity};
+        Element** old_table{m_table};
 
         m_bucket_count = 0;
         m_size = 0;
         m_capacity = old_capacity * 2;
-        m_table = new Element*[m_capacity]();
-        for (index = 0; index < old_capacity; index++) {
-            e = old_table[index];
-            for (e = old_table[index]; e; tmp = e, put(e->key, e->val), e = e->next, delete tmp)
+        m_table = new Element* [m_capacity] {};
+        for (std::size_t index{0}; index < old_capacity; index++) {
+            for (Element *e{old_table[index]}, *tmp{}; e; tmp = e, put(e->key, e->val), e = e->next, delete tmp)
                 ;
         }
         delete[] old_table;
     }
 
     void ht_put(const K& key, const V& val) {
-        std::size_t index(hash(key) % m_capacity);
-        Element* e(m_table[index]);
+        std::size_t index{hash(key) % m_capacity};
+        Element* e{m_table[index]};
 
         if (e) {
             for (; e->key != key; e = e->next) {
@@ -66,8 +64,8 @@ private:
     }
 
     const V& ht_get(const K& key) {
-        int index(hash(key) % m_capacity);
-        Element* e(m_table[index]);
+        std::size_t index{hash(key) % m_capacity};
+        Element* e{m_table[index]};
 
         for (; e && e->key != key; e = e->next)
             ;
@@ -76,9 +74,8 @@ private:
     }
 
     void ht_remove(const K& key) {
-        int index(hash(key) % m_capacity);
-        Element* e(m_table[index]);
-        Element* tmp(nullptr);
+        std::size_t index{hash(key) % m_capacity};
+        Element *e{m_table[index]}, *tmp{};
 
         if (!e) return;
         if (e->key == key) {
@@ -101,11 +98,8 @@ private:
     }
 
     void ht_free() {
-        std::size_t index;
-        Element *e, *tmp;
-
-        for (index = 0; index < m_capacity; index++) {
-            for (e = m_table[index]; e; tmp = e, e = e->next, delete tmp)
+        for (std::size_t index{0}; index < m_capacity; index++) {
+            for (Element *e{m_table[index]}, *tmp{}; e; tmp = e, e = e->next, delete tmp)
                 ;
         }
         delete[] m_table;
@@ -114,12 +108,12 @@ private:
 public:
     static constexpr float LOAD_FACTOR = 0.75;
     static constexpr std::size_t INITIAL_CAPACITY = 16;
-    HashTable() : m_bucket_count(0), m_size(0), m_capacity(INITIAL_CAPACITY), m_table(new Element*[m_capacity]()){};
+    HashTable() : m_bucket_count{0}, m_size{0}, m_capacity{INITIAL_CAPACITY}, m_table{new Element* [m_capacity] {}} {};
     ~HashTable() { ht_free(); }
     void put(const K& key, const V& val) { return ht_put(key, val); }
     const V& get(const K& key) { return ht_get(key); }
     void remove(const K& key) { return ht_remove(key); }
-    std::size_t size(){ return m_size; }
+    std::size_t size() { return m_size; }
 };
 
 #endif
