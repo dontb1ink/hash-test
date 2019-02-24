@@ -1,5 +1,7 @@
 // clang-format off
 #include <iostream>
+#include <unordered_set>
+#include <unordered_map>
 #include "hash.hpp"
 
 #define BOOST_TEST_MODULE hash
@@ -8,7 +10,7 @@
 
 BOOST_AUTO_TEST_CASE(test_put_get) {
     HashTable<int, char> ht;
-    int key(42);
+    int key(-42);
     char val('v');
 
     ht.put(key, val);
@@ -23,6 +25,8 @@ BOOST_AUTO_TEST_CASE(test_size) {
     ht.put(42, 'v');
     BOOST_TEST(ht.size() == 1);
 }
+
+// update single, fornt back
 
 BOOST_AUTO_TEST_CASE(test_remove_empty) {
     HashTable<int, char> ht;
@@ -82,7 +86,6 @@ BOOST_AUTO_TEST_CASE(test_remove_middle) {
     BOOST_TEST(ht.get(key1) == key1);
     BOOST_TEST(ht.get(key3) == key3);
 }
-
 
 BOOST_AUTO_TEST_CASE(test_collision_single) {
     HashTable<int, char> ht;
@@ -151,4 +154,46 @@ BOOST_AUTO_TEST_CASE(test_resize3) {
         BOOST_TEST(ht.get(i) == i);
     }
     BOOST_TEST(ht.size() == threshold);
+}
+
+BOOST_AUTO_TEST_CASE(test_unique_and_random_put) {
+    const std::size_t size{100000};
+    std::size_t i{};
+    std::unordered_set<int> keys;
+    std::unordered_set<int>::iterator it;
+    HashTable<int, int> ht;
+
+    for (; keys.size() != size; keys.insert(rand()))
+        ;
+
+    for (it = keys.begin(); it != keys.cend(); it++, i++) {
+        ht.put(*it, *it);
+        BOOST_TEST(ht.size() == i + 1);
+        BOOST_TEST(ht.get(*it) == *it);
+    }
+    for (it = keys.begin(); it != keys.cend(); it++) {
+        BOOST_TEST(ht.get(*it) == *it);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_chaos) {
+    const std::size_t size{100000};
+    std::size_t i{};
+    int key;
+    HashTable<int, int> ht;
+    std::unordered_map<int, int> control;
+
+    for (key = rand() % size; i < size; key = rand() % size, i++) {
+        if (i % 2) {
+            ht.put(key, key);
+            control.insert(key, key);
+        } else {
+            ht.remove(key);
+            control.erase(key);
+        }
+    }
+
+    for(auto it = control.begin(); it != control.end(); it++){
+        BOOST_TEST(ht.get(it->first) == control.find(it->first)->second);
+    }
 }
