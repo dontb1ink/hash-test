@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(test_size) {
     BOOST_TEST(ht.size() == 1);
 }
 
-// update single, fornt back
+// TODO: update single, fornt back
 
 BOOST_AUTO_TEST_CASE(test_remove_empty) {
     HashTable<int, char> ht;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_collision_multiple) {
 BOOST_AUTO_TEST_CASE(test_resize1) {
     int i;
     HashTable<int, int> ht;
-    int threshold(ht.INITIAL_CAPACITY * ht.LOAD_FACTOR);
+    int threshold(ht.INITIAL_CAPACITY * ht.MAX_LOAD_FACTOR);
 
     for (i = 0; i < threshold; i++) {
         ht.put(i, i);
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_resize1) {
 BOOST_AUTO_TEST_CASE(test_resize2) {
     int i, offset(42);
     HashTable<int, int> ht;
-    int threshold(ht.INITIAL_CAPACITY * ht.LOAD_FACTOR);
+    int threshold(ht.INITIAL_CAPACITY * ht.MAX_LOAD_FACTOR);
 
     for (i = 0; i < threshold; i++) {
         ht.put(i + offset, i);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_resize2) {
 BOOST_AUTO_TEST_CASE(test_resize3) {
     int i;
     HashTable<int, int> ht;
-    int threshold(ht.INITIAL_CAPACITY * ht.LOAD_FACTOR * 2 * 2 * 2);
+    int threshold(ht.INITIAL_CAPACITY * ht.MAX_LOAD_FACTOR * 2 * 2 * 2);
 
     for (i = 0; i < threshold; i++) {
         ht.put(i, i);
@@ -186,14 +186,14 @@ BOOST_AUTO_TEST_CASE(test_chaos) {
     for (key = rand() % size; i < size; key = rand() % size, i++) {
         if (i % 2) {
             ht.put(key, key);
-            control.insert(key, key);
+            control.insert({key, key});
         } else {
             ht.remove(key);
             control.erase(key);
         }
     }
 
-    for(auto it = control.begin(); it != control.end(); it++){
+    for (auto it = control.begin(); it != control.end(); it++) {
         BOOST_TEST(ht.get(it->first) == control.find(it->first)->second);
     }
 }
